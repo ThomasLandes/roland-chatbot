@@ -1,0 +1,9 @@
+.venv/
+.env
+__pycache__/
+*.pyc
+data/chroma/
+data/logs.csv
+node_modules/
+dist/
+.vite/
