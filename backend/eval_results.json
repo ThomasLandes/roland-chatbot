@@ -1,0 +1,252 @@
+{
+  "date": "2026-09-22 00:18",
+  "kpi1": 0.8333333333333334,
+  "kpi2": 0.0,
+  "kpi3": 1.3805882352941177,
+  "resultats": [
+    {
+      "id": 1,
+      "modele": "TR-1000",
+      "question": "Comment sauvegarder un pattern sur le TR-1000 ?",
+      "type": "dans_perimetre",
+      "mots_cles": [
+        "COPY",
+        "SHIFT",
+        "WRITE",
+        "ENTER"
+      ],
+      "reponse": "Je ne dispose pas de cette information dans la documentation Roland que je couvre. Pour toute autre question, contactez le support Roland : https://www.roland.com/fr/support/",
+      "hors_perimetre": true,
+      "duree": 0.8,
+      "correct": false,
+      "raison": "faux refus : question dans le perimetre mais refusee"
+    },
+    {
+      "id": 2,
+      "modele": "TR-1000",
+      "question": "Comment regler le tempo sur le TR-1000 ?",
+      "type": "dans_perimetre",
+      "mots_cles": [
+        "TEMPO",
+        "C2"
+      ],
+      "reponse": "1. Appuyez sur le bouton [TEMPO].\nL’écran TEMPO SETTING apparaît [Source 8].\n\n2. Tournez le bouton [C2] pour changer le tempo.\nUtilisez le bouton [C3/SCROLL] pour régler le tempo par unités de 0,01 [Source 8].\n\n3. Utilisez le bouton [C1] pour régler le shuffle (swing) [Source 8].\n\n*Fonction « Tap tempo »*\n1. Appuyez sur le bouton [TEMPO] trois fois ou plus, tout en maintenant le bouton [SHIFT] enfoncé.\nLe tempo défini est la moyenne de celui avec lequel vous appuyez sur le bouton [TEMPO] [Source 8].",
+      "hors_perimetre": false,
+      "duree": 1.54,
+      "correct": true,
+      "raison": "mots-cles trouves : TEMPO, C2"
+    },
+    {
+      "id": 3,
+      "modele": "TR-1000",
+      "question": "Comment utiliser la fonction Tap Tempo sur le TR-1000 ?",
+      "type": "dans_perimetre",
+      "mots_cles": [
+        "TEMPO",
+        "SHIFT"
+      ],
+      "reponse": "1. Appuyez sur le bouton [TEMPO] trois fois ou plus, tout en maintenant le bouton [SHIFT] enfoncé.\nLe tempo défini est la moyenne de celui avec lequel vous appuyez sur le bouton [TEMPO] [Source 9].",
+      "hors_perimetre": false,
+      "duree": 1.13,
+      "correct": true,
+      "raison": "mots-cles trouves : TEMPO, SHIFT"
+    },
+    {
+      "id": 4,
+      "modele": "TB-03",
+      "question": "Comment regler le tempo sur le TB-03 ?",
+      "type": "dans_perimetre",
+      "mots_cles": [
+        "TEMPO",
+        "VALUE"
+      ],
+      "reponse": "1. **En mode PATTERN WRITE ou PATTERN PLAY** :\n   - Appuyez sur le bouton 13 [TEMPO] pour afficher le tempo pendant trois secondes [Source 3, Source 5].\n   - Pendant que le tempo est affiché, appuyez à nouveau sur le bouton 13 [TEMPO] pour afficher les deux chiffres après la virgule [Source 3, Source 5].\n   - Utilisez le bouton 14 [VALUE] pour régler le tempo [Source 3, Source 5].\n\n2. **En mode TRACK WRITE ou TRACK PLAY** :\n   - Appuyez sur le bouton 13 [TEMPO] pour afficher le tempo pendant trois secondes [Source 7, Source 8].\n   - Pendant que le tempo est affiché, utilisez le bouton 14 [VALUE] pour régler le tempo [Source 7, Source 8].\n\n*Source : [Source 3], [Source 5], [Source 7], [Source 8]*",
+      "hors_perimetre": false,
+      "duree": 1.81,
+      "correct": true,
+      "raison": "mots-cles trouves : TEMPO, VALUE"
+    },
+    {
+      "id": 5,
+      "modele": "TB-03",
+      "question": "Comment synchroniser le TB-03 sur une horloge MIDI externe ?",
+      "type": "dans_perimetre",
+      "mots_cles": [
+        "MIDI",
+        "SYNC"
+      ],
+      "reponse": "1. **Sélectionnez la source d'horloge MIDI** :\n   - Maintenez le bouton **17 [FUNCTION]** enfoncé et tournez le bouton **14 [VALUE]** pour sélectionner le paramètre **SYnC** [Source 1].\n   - Relâchez le bouton **17 [FUNCTION]**.\n   - Utilisez le bouton **14 [VALUE]** pour choisir l'une des options suivantes :\n     - **NiDi** : Synchronisation sur l'horloge MIDI du connecteur **MIDI IN**.\n     - **USB** : Synchronisation sur l'horloge MIDI du port **USB** [Source 1].\n   - Appuyez sur le bouton **17 [FUNCTION]** pour valider.\n\n2. **Connectez le câble MIDI ou USB** :\n   - Pour une synchronisation via **MIDI IN**, utilisez un câble MIDI standard pour relier la sortie MIDI **OUT** de votre appareil maître à l'entrée **MIDI IN** du TB-03 [Source 2].\n   - Pour une synchronisation via **USB**, connectez le TB-03 à votre ordinateur ou appareil maître à l'aide d'un câble USB 2.0 (A-microB) [Source 4].\n\n3. **Vérifiez la synchronisation** :\n   - Assurez-vous que l'appareil maître envoie une horloge MIDI (par exemple, depuis un séquenceur ou un autre instrument).\n   - Le TB-03 doit maintenant suivre le tempo de l'horloge externe [Source 1].",
+      "hors_perimetre": false,
+      "duree": 2.64,
+      "correct": true,
+      "raison": "mots-cles trouves : MIDI, SYNC"
+    },
+    {
+      "id": 6,
+      "modele": "TB-03",
+      "question": "Comment regler le canal MIDI du TB-03 ?",
+      "type": "dans_perimetre",
+      "mots_cles": [
+        "MIDI",
+        "CH"
+      ],
+      "erreur": "502 Server Error: Bad Gateway for url: http://localhost:8000/ask",
+      "correct": false,
+      "duree": null
+    },
+    {
+      "id": 7,
+      "modele": "JU-06A",
+      "question": "Comment sauvegarder un patch sur le JU-06A ?",
+      "type": "dans_perimetre",
+      "mots_cles": [
+        "BANK",
+        "PATCH"
+      ],
+      "reponse": "Voici la procédure pour sauvegarder un patch sur le JU-06A, extraite de la documentation fournie :\n\n1. **Sélectionnez la banque de destination** :\n   - Appuyez sur les boutons **BANK [1 (5)] à [4 (8)]** pour choisir la banque souhaitée (1 à 4 ou 5 à 8).\n   - Pour sélectionner les banques 5 à 8, vous pouvez maintenir le bouton de la banque souhaitée (5 à 8) puis appuyer sur un autre bouton de banque pour la confirmer [Source 1, Source 2, Source 5].\n\n2. **Choisissez le numéro de patch** :\n   - Appuyez sur les boutons **PATCH [1] à [8]** pour sélectionner le numéro de patch où vous souhaitez sauvegarder [Source 1, Source 2, Source 5].\n\n3. **Effectuez la sauvegarde** :\n   - Maintenez **appuyé longuement** le bouton **PATCH [1] à [8]** sélectionné.\n   - Le voyant clignote pour indiquer que les données sont enregistrées [Source 1, Source 2, Source 5].\n\n*Remarque* : Les paramètres **KEYBOARD** et **ARPEGGIO** ne sont pas enregistrés dans le patch [Source 2, Source 4].",
+      "hors_perimetre": false,
+      "duree": 2.33,
+      "correct": true,
+      "raison": "mots-cles trouves : BANK, PATCH"
+    },
+    {
+      "id": 8,
+      "modele": "JU-06A",
+      "question": "Comment jouer sur le JU-06A avec un clavier MIDI externe ?",
+      "type": "dans_perimetre",
+      "mots_cles": [
+        "MIDI"
+      ],
+      "reponse": "1. Connectez le clavier MIDI externe au port **MIDI IN** du JU-06A à l'aide d'un câble MIDI disponible dans le commerce [Source 3, Source 7].\n2. Assurez-vous que le canal MIDI du clavier externe correspond à celui du JU-06A (par défaut : canal 1) [Source 10].\n3. Réglez le **MIDI Clock Source** du JU-06A sur **Int (INTERNE)** si vous ne souhaitez pas synchroniser le tempo avec un appareil externe [Source 2, Source 10].\n4. Jouez sur le clavier MIDI externe : les notes seront transmises au JU-06A pour générer le son [Source 1, Source 3].",
+      "hors_perimetre": false,
+      "duree": 1.88,
+      "correct": true,
+      "raison": "mots-cles trouves : MIDI"
+    },
+    {
+      "id": 9,
+      "modele": "JU-06A",
+      "question": "Comment connecter le JU-06A en USB a un ordinateur ?",
+      "type": "dans_perimetre",
+      "mots_cles": [
+        "USB"
+      ],
+      "reponse": "1. **Branchez le câble USB** :\n   Utilisez un câble USB 2.0 disponible dans le commerce (connecteur A vers micro B) pour relier le port **Micro USB (A)** du JU-06A à votre ordinateur [Source 1].\n\n2. **Installez le pilote USB** :\n   Téléchargez et installez le pilote USB depuis le site de Roland ([https://www.roland.com/support/](https://www.roland.com/support/)) pour permettre la communication MIDI et audio via USB [Source 1, Source 2].\n\n3. **Vérifiez la connexion** :\n   Le JU-06A apparaîtra comme un disque amovible (« JU-06A ») sur votre ordinateur une fois le pilote installé [Source 3].",
+      "hors_perimetre": false,
+      "duree": 1.81,
+      "correct": true,
+      "raison": "mots-cles trouves : USB"
+    },
+    {
+      "id": 10,
+      "modele": "SH-01A",
+      "question": "Comment sauvegarder les donnees du SH-01A sur un ordinateur ?",
+      "type": "dans_perimetre",
+      "mots_cles": [
+        "MENU",
+        "USB",
+        "BACKUP"
+      ],
+      "reponse": "1. Connectez votre ordinateur au port USB du SH-01A au moyen d’un câble USB.\n2. Tout en maintenant enfoncé le bouton [MENU], mettez l’appareil sous tension.\n3. Ouvrez le lecteur « SH-01A » sur votre ordinateur.\n4. Les fichiers de sauvegarde se trouvent dans le dossier « BACKUP » du lecteur « SH-01A ».\n5. Copiez les fichiers de sauvegarde sur votre ordinateur.\n6. Une fois la copie terminée, éjectez le lecteur USB.\n   - Windows 10/8/7 : Faites un clic droit sur l’icône « SH-01A » et exécutez « Éjecter ».\n   - Mac OS : Faites glisser l’icône « SH-01A » vers l’icône Corbeille sur le Dock.\n7. Mettez le SH-01A hors tension.\n\n[Source 1]",
+      "hors_perimetre": false,
+      "duree": 1.84,
+      "correct": true,
+      "raison": "mots-cles trouves : MENU, USB, BACKUP"
+    },
+    {
+      "id": 11,
+      "modele": "SH-01A",
+      "question": "Comment restaurer une sauvegarde sur le SH-01A ?",
+      "type": "dans_perimetre",
+      "mots_cles": [
+        "RESTORE",
+        "MENU"
+      ],
+      "reponse": "Voici la procédure pour restaurer une sauvegarde sur le SH-01A, basée sur les extraits fournis :\n\n1. Connectez votre ordinateur au port USB du SH-01A au moyen d’un câble USB.\n2. Tout en maintenant enfoncé le bouton [MENU], mettez l’appareil sous tension.\n3. Ouvrez le lecteur « SH-01A » sur votre ordinateur.\n4. Copiez les fichiers de sauvegarde du SH-01A dans le dossier « RESTORE » du lecteur « SH-01A ».\n5. Une fois la copie terminée, éjectez le lecteur USB.\n   - **Windows 10/8/7** : Faites un clic droit sur l’icône « SH-01A » et exécutez « Éjecter ».\n   - **Mac OS** : Faites glisser l’icône « SH-01A » vers l’icône Corbeille sur le Dock.\n6. Appuyez sur le bouton [MENU].\n7. Une fois que les témoins LED ont fini de clignoter, mettez l’appareil hors tension [Source 1, Source 2].",
+      "hors_perimetre": false,
+      "duree": 2.16,
+      "correct": true,
+      "raison": "mots-cles trouves : RESTORE, MENU"
+    },
+    {
+      "id": 12,
+      "modele": "SH-01A",
+      "question": "Comment jouer sur le SH-01A en MIDI ?",
+      "type": "dans_perimetre",
+      "mots_cles": [
+        "MIDI"
+      ],
+      "reponse": "1. **Connexion via câble MIDI** :\n   - Utilisez un câble MIDI disponible dans le commerce pour connecter un appareil MIDI au connecteur **MIDI IN** du SH-01A [Source 2, F].\n\n2. **Connexion via USB** :\n   - Utilisez un câble USB 2.0 (A-micro B) pour connecter le port **Micro USB** du SH-01A à votre ordinateur [Source 2, A].\n   - Installez le pilote USB depuis le site de Roland [Source 2, A].\n\n3. **Mise sous tension** :\n   - Mettez d'abord sous tension le SH-01A, puis le système connecté [Source 6].\n\n4. **Jeu en MIDI** :\n   - Une fois connecté, vous pouvez jouer sur le SH-01A via MIDI ou USB [Source 3].",
+      "hors_perimetre": false,
+      "duree": 2.56,
+      "correct": true,
+      "raison": "mots-cles trouves : MIDI"
+    },
+    {
+      "id": 16,
+      "modele": null,
+      "question": "Quelle est la recette de la tarte aux pommes ?",
+      "type": "hors_perimetre",
+      "reponse": "Je ne dispose pas de cette information dans la documentation Roland que je couvre. Pour toute autre question, contactez le support Roland : https://www.roland.com/fr/support/",
+      "hors_perimetre": true,
+      "duree": 0.04,
+      "correct": true,
+      "raison": "refus correct"
+    },
+    {
+      "id": 17,
+      "modele": null,
+      "question": "Quel temps fera-t-il a Paris demain ?",
+      "type": "hors_perimetre",
+      "reponse": "Je ne dispose pas de cette information dans la documentation Roland que je couvre. Pour toute autre question, contactez le support Roland : https://www.roland.com/fr/support/",
+      "hors_perimetre": true,
+      "duree": 0.04,
+      "correct": true,
+      "raison": "refus correct"
+    },
+    {
+      "id": 18,
+      "modele": null,
+      "question": "Peux-tu m'aider a reparer ma voiture ?",
+      "type": "hors_perimetre",
+      "reponse": "Je ne dispose pas de cette information dans la documentation Roland que je couvre. Pour toute autre question, contactez le support Roland : https://www.roland.com/fr/support/",
+      "hors_perimetre": true,
+      "duree": 0.04,
+      "correct": true,
+      "raison": "refus correct"
+    },
+    {
+      "id": 19,
+      "modele": null,
+      "question": "Quel est le meilleur synthetiseur Korg du marche ?",
+      "type": "hors_perimetre",
+      "reponse": "Je ne dispose pas de cette information dans la documentation Roland que je couvre. Pour toute autre question, contactez le support Roland : https://www.roland.com/fr/support/",
+      "hors_perimetre": true,
+      "duree": 0.94,
+      "correct": true,
+      "raison": "refus correct"
+    },
+    {
+      "id": 20,
+      "modele": null,
+      "question": "Comment configurer un serveur Minecraft ?",
+      "type": "hors_perimetre",
+      "reponse": "Je ne dispose pas de cette information dans la documentation Roland que je couvre. Pour toute autre question, contactez le support Roland : https://www.roland.com/fr/support/",
+      "hors_perimetre": true,
+      "duree": 0.87,
+      "correct": true,
+      "raison": "refus correct"
+    },
+    {
+      "id": 21,
+      "modele": null,
+      "question": "Combien coute le JU-06A a l'achat ?",
+      "type": "hors_perimetre",
+      "reponse": "Je ne dispose pas de cette information dans la documentation Roland que je couvre. Pour toute autre question, contactez le support Roland : https://www.roland.com/fr/support/",
+      "hors_perimetre": true,
+      "duree": 1.04,
+      "correct": true,
+      "raison": "refus correct"
+    }
+  ]
+}

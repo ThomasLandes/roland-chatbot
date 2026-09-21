@@ -30,9 +30,10 @@ Question
 | Composant | Technologie |
 |---|---|
 | Extraction PDF | pypdf |
-| Embeddings | sentence-transformers, multilingual-e5-small (local) |
+| Embeddings | sentence-transformers, multilingual-e5-base (local) |
 | Base vectorielle | ChromaDB |
-| LLM | API externe (Mistral, configurable : Anthropic, OpenAI, Groq) |
+| LLM | API externe (Mistral, configurable : Anthropic, OpenAI, Groq, xAI/Grok) |
+| Comptes / auth | SQLite (data/users.db) + bcrypt + JWT (PyJWT) |
 | Backend | Python 3.13, FastAPI |
 | Frontend | React 19, Vite, Tailwind CSS |
 
@@ -44,7 +45,8 @@ python -m venv .venv
 pip install -r requirements.txt
 
 copy .env.example .env
-# renseigner LLM_API_KEY
+# renseigner LLM_API_KEY et JWT_SECRET (chaine longue et aleatoire,
+# par exemple : python -c "import secrets; print(secrets.token_hex(32))")
 
 python backend/ingest.py
 ```
@@ -71,17 +73,35 @@ Documentation API : http://localhost:8000/docs
 
 | Endpoint | Methode | Description |
 |---|---|---|
-| `/health` | GET | Etat du service |
-| `/ask` | POST | Question, retourne reponse et sources |
-| `/admin/stats` | GET | Statistiques du corpus et d'usage |
+| `/health` | GET | Etat du service (public) |
+| `/auth/register` | POST | Creation de compte (`email`, `mot_de_passe`), retourne un token |
+| `/auth/login` | POST | Connexion, retourne un token |
+| `/auth/me` | GET | Utilisateur courant (necessite le token) |
+| `/ask` | POST | Question, retourne reponse et sources (necessite le token) |
+| `/admin/stats` | GET | Statistiques du corpus et d'usage (reserve aux admins) |
 
-## Profils utilisateurs
+## Comptes et roles
 
-Deux profils, selectionnables dans l'interface et persistes en localStorage :
+L'acces au chatbot necessite desormais un compte (creation + connexion,
+formulaire dans l'interface). L'authentification repose sur un token JWT
+signe cote serveur, envoye dans l'en-tete `Authorization: Bearer <token>` ;
+le role n'est jamais fourni par le client, il vient du token verifie.
 
-- **Utilisateur** : reponse et sources citees
+- **Utilisateur** (role par defaut a l'inscription) : reponse et sources
+  citees
 - **Administrateur** : ajoute les statistiques du corpus, les chunks
   recuperes, les distances vectorielles et la requete enrichie
+
+Tous les comptes crees via le formulaire sont `user`. Pour obtenir un
+compte administrateur, inscris-toi normalement puis lance :
+
+```bash
+python backend/make_admin.py ton-email@exemple.com
+```
+
+Reconnecte-toi ensuite dans l'interface : un token deja emis garde le role
+qu'il avait au moment de la connexion pendant 24h, il faut donc se
+reconnecter apres une promotion pour que le nouveau role prenne effet.
 
 ## Objectifs et etat d'avancement
 
@@ -90,7 +110,7 @@ Deux profils, selectionnables dans l'interface et persistes en localStorage :
 | OF1 | 90% d'exactitude | En cours (phase de tests) |
 | OF2 | Citation systematique des sources | Fait |
 | OF3 | Refus hors perimetre avec redirection | Fait (double filtre) |
-| OF4 | 2 profils utilisateurs | Fait |
+| OF4 | 2 profils utilisateurs | Fait (avec authentification reelle) |
 | OT1 | Architecture RAG avec ChromaDB | Fait |
 | OT2 | Temps de reponse < 5s | Fait (~1.5s mesure) |
 | OT3 | Taux d'hallucination < 5% | En cours |

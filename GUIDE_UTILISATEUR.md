@@ -2,7 +2,7 @@
 
 **Assistant Roland**
 
-Version 1.0
+Version 1.1
 
 ---
 
@@ -13,7 +13,7 @@ Version 1.0
 3. [Poser une question efficace](#3-poser-une-question-efficace)
 4. [Comprendre une réponse](#4-comprendre-une-réponse)
 5. [Les différents types de réponses](#5-les-différents-types-de-réponses)
-6. [Le profil administrateur](#6-le-profil-administrateur)
+6. [Le rôle administrateur](#6-le-rôle-administrateur)
 7. [Limites à connaître](#7-limites-à-connaître)
 8. [Questions fréquentes](#8-questions-fréquentes)
 
@@ -44,9 +44,19 @@ Il vous évite de parcourir un manuel de plusieurs dizaines de pages pour retrou
 
 Ouvrez l'interface dans votre navigateur à l'adresse indiquée par votre administrateur, par défaut `http://localhost:5173`.
 
+### Créer un compte ou se connecter
+
+L'accès au chatbot nécessite un compte. Lors de votre première visite, créez un compte avec une adresse email et un mot de passe (8 caractères minimum) via le lien d'inscription. Les visites suivantes, connectez-vous simplement avec ces mêmes identifiants.
+
+Un compte créé par inscription a le rôle **Utilisateur**. Le rôle **Administrateur** (section 6) ne s'obtient pas par inscription : il est attribué par un administrateur déjà en place, ou par la personne ayant déployé l'application.
+
+Votre session reste active 24 heures. Passé ce délai, une reconnexion est demandée.
+
+### Poser une question
+
 L'écran d'accueil vous propose trois questions d'exemple. Cliquez sur l'une d'elles pour la faire apparaître dans le champ de saisie, ou tapez directement votre propre question.
 
-Appuyez sur la touche Entrée ou cliquez sur **Envoyer**. La réponse arrive en une à deux secondes.
+Appuyez sur la touche Entrée ou cliquez sur **Envoyer**. La réponse arrive généralement en une à deux secondes, parfois un peu plus selon la complexité de la question.
 
 ---
 
@@ -121,11 +131,11 @@ La communication avec le service a échoué. Vérifiez votre connexion et réess
 
 ---
 
-## 6. Le profil administrateur
+## 6. Le rôle administrateur
 
-Un sélecteur en haut à droite permet de basculer entre le profil **Utilisateur** et le profil **Administrateur**. Votre choix est mémorisé et conservé d'une visite à l'autre.
+Si votre compte a le rôle **Administrateur**, l'interface affiche des éléments supplémentaires, invisibles pour un compte **Utilisateur** classique. Ce rôle est attribué par un autre administrateur (section 2) et ne se choisit pas soi-même.
 
-Le profil administrateur ajoute trois éléments.
+### 6.1 Diagnostic des réponses
 
 **Un bandeau de statistiques** en haut de l'écran : nombre de documents indexés, nombre de fragments de texte, fournisseur utilisé, seuil de refus, et statistiques d'usage.
 
@@ -133,7 +143,17 @@ Le profil administrateur ajoute trois éléments.
 
 **Un panneau « Détails techniques »** dépliable sous chaque réponse, qui expose le fonctionnement interne : le modèle d'instrument détecté, la requête après enrichissement automatique, la cause d'un éventuel refus, et l'intégralité des passages consultés avec leur extrait.
 
-Ce profil sert au diagnostic. Face à une réponse insatisfaisante, il permet de déterminer si l'assistant a consulté les bons passages ou s'il a mal exploité les bons passages. Ce sont deux problèmes distincts qui appellent des corrections différentes.
+Ce rôle sert au diagnostic. Face à une réponse insatisfaisante, il permet de déterminer si l'assistant a consulté les bons passages ou s'il a mal exploité les bons passages. Ce sont deux problèmes distincts qui appellent des corrections différentes.
+
+### 6.2 Gérer les documents indexés
+
+Un panneau « Documents » liste les PDF actuellement indexés avec leur taille. Il permet d'ajouter un nouveau manuel (glisser-déposer ou sélection du fichier, format PDF uniquement) et de supprimer un document existant.
+
+**Important : ajouter ou supprimer un fichier ne suffit pas.** Ces deux actions modifient uniquement la liste des documents disponibles. Pour que le chatbot tienne compte du changement dans ses réponses, il faut ensuite cliquer sur **Réindexer**. Une barre de progression s'affiche pendant l'opération, qui peut prendre de quelques secondes à quelques dizaines de secondes selon le nombre et la taille des documents. Le chatbot reste utilisable normalement une fois la réindexation terminée, sans redémarrage du service.
+
+### 6.3 Gérer les comptes utilisateurs
+
+Un panneau « Utilisateurs » liste les comptes créés, avec leur rôle. Un administrateur peut changer le rôle d'un autre compte ou le supprimer. Par sécurité, il est impossible de modifier son propre rôle ou de supprimer son propre compte depuis cette interface, et le dernier compte administrateur du système ne peut être ni rétrogradé ni supprimé.
 
 ---
 

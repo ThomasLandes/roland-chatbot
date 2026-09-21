@@ -1,26 +1,55 @@
 import { useState, useEffect, useRef } from "react";
-
-const API = "http://localhost:8000";
+import Login from "./Login.jsx";
+import UsersPanel from "./UsersPanel.jsx";
+import DocumentsPanel from "./DocumentsPanel.jsx";
+import { ErreurAuth, clearToken, getToken, moi, poserQuestion, statsAdmin } from "./api";
 
 export default function App() {
-  const [profil, setProfil] = useState(
-    () => localStorage.getItem("profil") || "user"
-  );
+  const [user, setUser] = useState(null);
+  const [verificationEnCours, setVerificationEnCours] = useState(true);
+  const [vue, setVue] = useState("chat"); // "chat" | "utilisateurs" | "documents"
+
   const [messages, setMessages] = useState([]);
   const [question, setQuestion] = useState("");
   const [chargement, setChargement] = useState(false);
   const [stats, setStats] = useState(null);
   const bas = useRef(null);
+  const envoiEnCours = useRef(false);
+
+  function deconnecter() {
+    clearToken();
+    setUser(null);
+    setMessages([]);
+    setStats(null);
+  }
+
+  // Au chargement : si un token est deja stocke, on verifie qu'il est
+  // toujours valide aupres du serveur avant d'afficher le chat.
+  useEffect(() => {
+    const token = getToken();
+    if (!token) {
+      setVerificationEnCours(false);
+      return;
+    }
+    moi()
+      .then((u) => setUser(u))
+      .catch(() => {})
+      .finally(() => setVerificationEnCours(false));
+  }, []);
 
   useEffect(() => {
-    localStorage.setItem("profil", profil);
-    if (profil === "admin") {
-      fetch(`${API}/admin/stats`)
-        .then((r) => r.json())
+    if (!user) return;
+    if (user.role === "admin") {
+      statsAdmin()
         .then(setStats)
-        .catch(() => setStats(null));
+        .catch((e) => {
+          if (e instanceof ErreurAuth) deconnecter();
+          setStats(null);
+        });
+    } else {
+      setStats(null);
     }
-  }, [profil]);
+  }, [user]);
 
   useEffect(() => {
     bas.current?.scrollIntoView({ behavior: "smooth" });
@@ -28,29 +57,41 @@ export default function App() {
 
   async function envoyer() {
     const q = question.trim();
-    if (!q || chargement) return;
+    // Un verrou en ref (pas seulement l'etat React) : l'etat "chargement" ne
+    // se met a jour qu'au prochain rendu, ce qui laisse une fenetre ou un
+    // appui prolonge sur Entree (repetition clavier) peut declencher
+    // plusieurs envois avant que React n'ait re-rendu.
+    if (!q || envoiEnCours.current) return;
+    envoiEnCours.current = true;
 
     setMessages((m) => [...m, { role: "user", texte: q }]);
     setQuestion("");
     setChargement(true);
 
     try {
-      const res = await fetch(`${API}/ask`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question: q, profil }),
-      });
-      if (!res.ok) throw new Error(`Erreur ${res.status}`);
-      const data = await res.json();
+      const data = await poserQuestion(q);
       setMessages((m) => [...m, { role: "bot", ...data }]);
     } catch (e) {
+      if (e instanceof ErreurAuth) {
+        deconnecter();
+        return;
+      }
       setMessages((m) => [
         ...m,
         { role: "bot", reponse: `Erreur de connexion a l'API : ${e.message}`, sources: [], erreur: true },
       ]);
     } finally {
       setChargement(false);
+      envoiEnCours.current = false;
     }
+  }
+
+  if (verificationEnCours) {
+    return <div className="min-h-screen bg-slate-100" />;
+  }
+
+  if (!user) {
+    return <Login onAuth={setUser} />;
   }
 
   const exemples = [
@@ -68,20 +109,49 @@ export default function App() {
             Documentation technique instruments Roland
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <label className="text-sm text-slate-300">Profil</label>
-          <select
-            value={profil}
-            onChange={(e) => setProfil(e.target.value)}
-            className="bg-slate-700 text-white text-sm rounded px-3 py-1.5 outline-none"
+        <div className="flex items-center gap-3">
+          <span className="text-sm text-slate-300">{user.email}</span>
+          <span
+            className={`text-xs rounded-full px-2.5 py-1 font-medium ${
+              user.role === "admin"
+                ? "bg-amber-500/20 text-amber-300"
+                : "bg-slate-700 text-slate-300"
+            }`}
           >
-            <option value="user">Utilisateur</option>
-            <option value="admin">Administrateur</option>
-          </select>
+            {user.role === "admin" ? "Administrateur" : "Utilisateur"}
+          </span>
+          {user.role === "admin" && (
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setVue(vue === "utilisateurs" ? "chat" : "utilisateurs")}
+                className="text-sm text-slate-300 hover:text-white border border-slate-600 rounded-lg px-3 py-1.5"
+              >
+                {vue === "utilisateurs" ? "Retour au chat" : "Utilisateurs"}
+              </button>
+              <button
+                onClick={() => setVue(vue === "documents" ? "chat" : "documents")}
+                className="text-sm text-slate-300 hover:text-white border border-slate-600 rounded-lg px-3 py-1.5"
+              >
+                {vue === "documents" ? "Retour au chat" : "Documents"}
+              </button>
+            </div>
+          )}
+          <button
+            onClick={deconnecter}
+            className="text-sm text-slate-300 hover:text-white border border-slate-600 rounded-lg px-3 py-1.5"
+          >
+            Deconnexion
+          </button>
         </div>
       </header>
 
-      {profil === "admin" && stats && (
+      {vue === "utilisateurs" && user.role === "admin" ? (
+        <UsersPanel moi={user} />
+      ) : vue === "documents" && user.role === "admin" ? (
+        <DocumentsPanel />
+      ) : (
+        <>
+      {user.role === "admin" && stats && (
         <div className="bg-amber-50 border-b border-amber-200 px-6 py-3 text-xs text-amber-900 flex flex-wrap gap-6">
           <span><b>{stats.documents}</b> documents</span>
           <span><b>{stats.chunks_total}</b> chunks</span>
@@ -140,7 +210,7 @@ export default function App() {
                       {m.sources.map((s) => (
                         <div key={s.n} className="text-xs text-slate-600">
                           [{s.n}] {s.source} &mdash; page {s.page}
-                          {profil === "admin" && ` (distance ${s.distance})`}
+                          {user.role === "admin" && ` (distance ${s.distance})`}
                         </div>
                       ))}
                     </div>
@@ -150,7 +220,7 @@ export default function App() {
                     <p className="text-xs text-slate-400 mt-2">{m.duree}s</p>
                   )}
 
-                  {profil === "admin" && m.debug && (
+                  {user.role === "admin" && m.debug && (
                     <details className="mt-3 pt-3 border-t border-slate-200">
                       <summary className="text-xs font-semibold text-slate-500 cursor-pointer">
                         Details techniques
@@ -193,9 +263,10 @@ export default function App() {
           <input
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && envoyer()}
+            onKeyDown={(e) => e.key === "Enter" && !e.repeat && envoyer()}
+            disabled={chargement}
             placeholder="Posez votre question..."
-            className="flex-1 border border-slate-300 rounded-lg px-4 py-2.5 outline-none focus:border-slate-900"
+            className="flex-1 border border-slate-300 rounded-lg px-4 py-2.5 outline-none focus:border-slate-900 disabled:opacity-60"
           />
           <button
             onClick={envoyer}
@@ -210,6 +281,8 @@ export default function App() {
           Verifiez les informations critiques dans le manuel officiel.
         </p>
       </footer>
+        </>
+      )}
     </div>
   );
 }

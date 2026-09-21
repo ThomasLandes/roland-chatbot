@@ -8,8 +8,8 @@
 | Élève | Thomas LANDES |
 | Tuteur | Stéphane CEZERA |
 | Établissement | Institut Limayrac, ESI 2, Titre RNCP niveau 7 |
-| Période | Février 2026 à Août 2026 |
-| Version du document | 1.0 |
+| Période | Février 2026 à Septembre 2026 |
+| Version du document | 1.1 |
 
 ---
 
@@ -57,11 +57,13 @@ L'objectif est de fournir un assistant conversationnel francophone qui répond �
 |---|---|
 | Questions/réponses sur la documentation Roland | Conversations multi-tours |
 | Citation systématique des sources | Contexte conversationnel |
-| Interface web simple | Mise à jour dynamique du corpus |
-| Refus explicite des questions hors périmètre | Application mobile |
-| Deux profils utilisateurs | LLM auto-hébergé |
-| Base vectorielle ChromaDB | UX/UI avancée |
-| API LLM externe | Multilingue |
+| Interface web simple | Application mobile |
+| Refus explicite des questions hors périmètre | LLM auto-hébergé |
+| Deux profils utilisateurs, authentification réelle | UX/UI avancée |
+| Base vectorielle ChromaDB | Multilingue |
+| API LLM externe | |
+
+La gestion de documents décrite en section 7.4 et 8 (upload, suppression, réindexation à chaud depuis l'interface admin) va au-delà du périmètre initial, qui excluait la mise à jour dynamique du corpus. Elle est présentée comme un bonus construit une fois le périmètre de base sécurisé, pas comme un engagement du cahier des charges.
 
 L'absence de contexte conversationnel est un choix assumé : chaque question est traitée indépendamment. Cela simplifie l'architecture et évite une classe entière de problèmes de dérive contextuelle, au prix de l'impossibilité de poser une question de suivi du type « et ensuite ? ».
 
@@ -86,7 +88,7 @@ Nettoyage (normalisation espaces et sauts de ligne)
 Découpage en chunks (1400 caractères, chevauchement 300)
     │  découpage aligné sur les sauts de ligne
     ▼
-Vectorisation (multilingual-e5-small, exécution locale)
+Vectorisation (multilingual-e5-base, exécution locale)
     │  préfixe "passage:" imposé par le modèle
     ▼
 ChromaDB (persistant, distance cosinus)
@@ -108,10 +110,17 @@ Détection du modèle d'instrument mentionné
 Vectorisation de la requête (préfixe "query:")
     │
     ▼
-Recherche des 8 chunks les plus proches
+Recherche vectorielle
     │  filtrage par métadonnée "modele" si un instrument est détecté
+    │  (dans ce cas, pool élargi à 50 candidats)
     ▼
-FILTRE 1 : distance du meilleur chunk > 0.19 ?
+Reclassement lexical (si un instrument est détecté)
+    │  bonus de tri pour les chunks contenant les mots de la question
+    │  (la distance affichée n'est pas modifiée)
+    ▼
+Conservation des 15 meilleurs chunks
+    ▼
+FILTRE 1 : distance minimale parmi les chunks retenus > 0.19 ?
     │  oui → refus, redirection support Roland
     ▼  non
 Construction du prompt (contexte + question)
@@ -144,7 +153,7 @@ La **génération passe par une API externe**, conformément au périmètre déf
 | Composant | Technologie retenue | Justification |
 |---|---|---|
 | Extraction PDF | `pypdf` | Les manuels Roland sont des PDF avec couche texte native. Un contrôle préalable a mesuré un ratio supérieur à 200 caractères par page sur l'ensemble du corpus, ce qui écarte le recours à l'OCR et évite la dépendance à Tesseract. |
-| Embeddings | `intfloat/multilingual-e5-small` | Modèle multilingue léger (470 Mo) capable de rapprocher une requête française d'un passage technique, y compris en anglais. Cette propriété est indispensable : une partie de la documentation Roland n'existe qu'en anglais. |
+| Embeddings | `intfloat/multilingual-e5-base` | Modèle multilingue (768 dimensions) capable de rapprocher une requête française d'un passage technique, y compris en anglais. Cette propriété est indispensable : une partie de la documentation Roland n'existe qu'en anglais. Remplace la version `-small` (384 dimensions) initialement retenue : des embeddings plus discriminants sur des paragraphes voisins d'un même manuel, au prix d'un modèle un peu plus lourd (transfert unique au premier lancement). |
 | Base vectorielle | ChromaDB | Mode persistant sur disque, aucun serveur à administrer, filtrage natif par métadonnées. Imposé par le cahier des charges. |
 | LLM | API externe, `mistral-small-latest` | Le code encapsule quatre fournisseurs interchangeables (Anthropic, OpenAI, Groq, Mistral) derrière une fonction unique. Changer de fournisseur consiste à modifier une variable d'environnement. |
 | Backend | Python 3.13, FastAPI | Documentation OpenAPI générée automatiquement, validation des entrées par Pydantic, chargement du modèle au démarrage plutôt qu'à chaque requête. |
@@ -245,9 +254,11 @@ Un dictionnaire de synonymes métier étend la requête avant vectorisation :
 ```python
 SYNONYMES = {
     "sauvegarder": "sauvegarder enregistrer write memoriser",
+    "enregistrer": "enregistrer write sauvegarder",
     "supprimer": "supprimer effacer clear delete",
     "connecter": "connecter brancher synchroniser midi",
     "regler": "regler parametrer configurer setting",
+    "régler": "regler parametrer configurer setting",
 }
 ```
 
@@ -264,21 +275,37 @@ modele = detecter_modele(question)
 kwargs = {"query_embeddings": [vec], "n_results": n}
 if modele:
     kwargs["where"] = {"modele": modele}
+    kwargs["n_results"] = max(n, N_ELARGI)   # N_ELARGI = 50
 ```
 
 Lorsque la question mentionne explicitement un instrument, la recherche est restreinte à ses documents. Sinon elle porte sur l'ensemble du corpus. La comparaison est insensible à la casse et aux tirets, de sorte que `TR-1000`, `tr1000` et `TR 1000` sont reconnus.
 
-### 6.3 Double filtre de refus
+### 6.3 Reclassement lexical
+
+Le jeu de tests constitué (section 14) a mis en évidence un cas où le passage attendu existait bien dans le corpus mais ressortait très loin dans le classement purement vectoriel (38ᵉ position sur 100 candidats), derrière des passages du même document évoquant un vocabulaire voisin sans contenir la procédure recherchée. Un premier correctif a porté sur le découpage (chunk plus petit, coupure nette aux titres de section) : il a bien isolé le passage visé mais a fait empirer son rang (55ᵉ) et cassé un cas qui fonctionnait jusque-là sur un autre document. Le découpage a donc été restauré à sa version d'origine (1400/300, section 13.2), et le correctif a été déplacé côté recherche.
+
+Quand un instrument est détecté, le pool de candidats est élargi à 50 (recherche peu coûteuse car filtrée sur un seul document). Chaque candidat reçoit ensuite un bonus de tri s'il contient littéralement des mots de la question (hors mots vides, accents ignorés) :
+
+```python
+BONUS_PAR_MOT_CLE = 0.03
+BONUS_MAX = 0.09
+
+score = distance - min(hits * BONUS_PAR_MOT_CLE, BONUS_MAX)
+```
+
+Les 50 candidats sont triés par ce score puis tronqués aux 15 premiers. La distance affichée à l'utilisateur et utilisée pour le filtre de refus (section 6.4) reste la distance vectorielle brute, non modifiée par le bonus : le score ne sert qu'au tri, jamais à la décision de refus ni à l'affichage. Sur le cas diagnostiqué, ce reclassement a fait remonter le passage attendu de la 38ᵉ à la 8ᵉ position.
+
+### 6.4 Double filtre de refus
 
 L'objectif OF3 impose le refus explicite des questions hors périmètre. Deux mécanismes indépendants y concourent.
 
-**Filtre 1, seuil de distance.** Si le chunk le plus proche dépasse une distance de 0.19, le système refuse sans appeler le LLM. Ce seuil a été calibré empiriquement : les questions légitimes du corpus se situent entre 0.116 et 0.155, une question manifestement hors sujet remonte à 0.209. La valeur de 0.19 place la frontière entre les deux populations. L'économie d'un appel API est un effet secondaire appréciable, mais l'intérêt principal est d'obtenir un comportement déterministe, indépendant du modèle de génération.
+**Filtre 1, seuil de distance.** Si la meilleure distance parmi les chunks retenus dépasse 0.19, le système refuse sans appeler le LLM. Ce seuil a été calibré empiriquement : les questions légitimes du corpus se situent entre 0.116 et 0.155, une question manifestement hors sujet remonte à 0.209. La valeur de 0.19 place la frontière entre les deux populations. Le filtre compare le **minimum** des distances brutes parmi les chunks renvoyés, et non celle du premier chunk de la liste : depuis le reclassement lexical (section 6.3), l'ordre d'affichage peut différer de l'ordre par distance pure. L'économie d'un appel API est un effet secondaire appréciable, mais l'intérêt principal est d'obtenir un comportement déterministe, indépendant du modèle de génération.
 
 **Filtre 2, aveu du modèle.** Le prompt système impose au LLM d'écrire exactement `INFORMATION_ABSENTE` lorsque les extraits fournis ne contiennent pas la réponse. Ce marqueur est intercepté avant affichage et remplacé par le message de redirection.
 
 Le premier filtre attrape les questions hors domaine. Le second attrape les questions dans le domaine dont la réponse ne figure pas dans le corpus indexé, cas que la distance seule ne permet pas de détecter. La cause du refus est conservée dans la réponse (`cause: "distance"` ou `cause: "llm"`), ce qui a permis de diagnostiquer précisément les incidents décrits en section 15.
 
-### 6.4 Prompt système
+### 6.5 Prompt système
 
 Le prompt encadre strictement le comportement du modèle :
 
@@ -297,9 +324,9 @@ Le prompt encadre strictement le comportement du modèle :
 
 Les règles 2 et 4 sont les plus importantes. Elles répondent à un incident d'hallucination observé et documenté en section 15, où le modèle avait complété une procédure incomplète avec des connaissances générales sur les instruments Roland.
 
-### 6.5 Extraction des sources citées
+### 6.6 Extraction des sources citées
 
-Les huit chunks récupérés sont numérotés et injectés dans le prompt. Le modèle n'en utilise généralement qu'une fraction. Afficher les huit noierait la source réelle dans le bruit.
+Les quinze chunks récupérés sont numérotés et injectés dans le prompt. Le modèle n'en utilise généralement qu'une fraction. Les afficher tous noierait la source réelle dans le bruit.
 
 Une expression régulière extrait les marqueurs effectivement présents dans la réponse, et seules les sources correspondantes sont affichées :
 
@@ -309,15 +336,16 @@ citees = set(int(n) for n in re.findall(r"Source\s+(\d+)", texte))
 
 Le motif est volontairement permissif afin de capturer les variantes de formatage, notamment `[Source 2, Source 8]` que le modèle produit lorsqu'une étape s'appuie sur plusieurs extraits. Un garde-fou affiche l'ensemble des sources si aucun marqueur n'est détecté, plutôt que de laisser une réponse sans aucune citation.
 
-### 6.6 Abstraction du fournisseur LLM
+### 6.7 Abstraction du fournisseur LLM
 
-Une fonction unique encapsule les quatre fournisseurs supportés. Anthropic utilise un format de requête distinct, les trois autres partagent le format compatible OpenAI.
+Une fonction unique encapsule les fournisseurs supportés. Anthropic utilise un format de requête distinct, les autres partagent le format compatible OpenAI.
 
 ```python
 endpoints = {
     "openai":  ("https://api.openai.com/v1/chat/completions", "gpt-4o-mini"),
     "groq":    ("https://api.groq.com/openai/v1/chat/completions", "llama-3.3-70b-versatile"),
     "mistral": ("https://api.mistral.ai/v1/chat/completions", "mistral-small-latest"),
+    "grok":    ("https://api.x.ai/v1/chat/completions", "grok-4.6"),
 }
 ```
 
@@ -343,11 +371,33 @@ def startup():
 
 L'impact est déterminant sur l'objectif OT2. En exécution ligne de commande, une réponse prend environ 7 secondes, dont l'essentiel est consacré au chargement du modèle. Via l'API, le temps mesuré descend à 1.56 seconde.
 
-### 7.2 Endpoints
+### 7.2 Authentification
+
+Fichiers : `backend/auth.py`, `backend/db.py`. Les profils déclaratifs de la version initiale (section 9) ont été remplacés par une authentification réelle : comptes stockés en base SQLite (`data/users.db`), mots de passe hashés avec bcrypt, sessions portées par un JWT signé (`Authorization: Bearer <token>`), sans état côté serveur.
+
+#### `POST /auth/register`
+
+Crée un compte de rôle `user` (email + mot de passe, 8 caractères minimum). Retourne un token. Un compte `admin` s'obtient en promouvant un compte existant via `backend/make_admin.py` ou `PATCH /admin/users/{id}/role`, jamais à l'inscription.
+
+#### `POST /auth/login`
+
+```json
+{ "email": "t.landes@test.fr", "mot_de_passe": "..." }
+```
+
+```json
+{ "access_token": "eyJ...", "token_type": "bearer", "email": "t.landes@test.fr", "role": "admin" }
+```
+
+#### `GET /auth/me`
+
+Retourne l'identité et le rôle associés au token fourni.
+
+### 7.3 Chatbot
 
 #### `GET /health`
 
-Vérification de disponibilité.
+Vérification de disponibilité, sans authentification.
 
 ```json
 { "status": "ok", "provider": "mistral" }
@@ -355,16 +405,13 @@ Vérification de disponibilité.
 
 #### `POST /ask`
 
-Corps de la requête :
+Nécessite un token valide (`Authorization: Bearer <token>`). Le rôle n'est plus déclaré par le client : il est lu depuis le token vérifié côté serveur, ce qui empêche un utilisateur de se l'attribuer lui-même.
 
 ```json
-{
-  "question": "Comment sauvegarder un pattern sur le TR-1000 ?",
-  "profil": "user"
-}
+{ "question": "Comment sauvegarder un pattern sur le TR-1000 ?" }
 ```
 
-Réponse pour le profil `user` :
+Réponse pour le rôle `user` :
 
 ```json
 {
@@ -377,18 +424,18 @@ Réponse pour le profil `user` :
 }
 ```
 
-Le profil `admin` reçoit en supplément un objet `debug` contenant la cause du refus le cas échéant, le modèle d'instrument détecté, la requête après enrichissement, et l'intégralité des chunks récupérés avec leur distance et un extrait de 300 caractères.
+Le rôle `admin` reçoit en supplément un objet `debug` contenant la cause du refus le cas échéant, le modèle d'instrument détecté, la requête après enrichissement, et l'intégralité des chunks récupérés avec leur distance et un extrait de 300 caractères.
 
-Codes d'erreur : `400` pour une question vide, `502` en cas d'échec de l'appel au fournisseur LLM.
+Codes d'erreur : `400` pour une question vide, `401` si le token est absent, invalide ou expiré, `502` en cas d'échec de l'appel au fournisseur LLM.
 
 #### `GET /admin/stats`
 
-Statistiques du corpus et d'usage.
+Réservé au rôle `admin`. Statistiques du corpus et d'usage.
 
 ```json
 {
   "documents": 4,
-  "chunks_total": 173,
+  "chunks_total": 275,
   "chunks_par_document": {
     "TR-1000_fra02_W.pdf": 96,
     "JU-06A_fra02_W.pdf": 28,
@@ -398,7 +445,7 @@ Statistiques du corpus et d'usage.
   "config": {
     "provider": "mistral",
     "seuil_hors_perimetre": 0.19,
-    "n_results": 8
+    "n_results": 15
   },
   "usage": {
     "questions_posees": 5,
@@ -410,7 +457,25 @@ Statistiques du corpus et d'usage.
 
 Cet endpoint alimente directement le suivi des indicateurs KPI3 (temps de réponse) et KPI4 (couverture du corpus).
 
-### 7.3 CORS
+### 7.4 Gestion des utilisateurs (admin)
+
+Réservé au rôle `admin`. `GET /admin/users` liste les comptes (sans le hash de mot de passe). `PATCH /admin/users/{id}/role` change le rôle d'un compte. `DELETE /admin/users/{id}` supprime un compte. Deux garde-fous protègent le système contre un blocage : un administrateur ne peut ni modifier son propre rôle ni supprimer son propre compte depuis cette interface, et le dernier compte `admin` du système ne peut être ni rétrogradé ni supprimé.
+
+### 7.5 Gestion des documents (admin)
+
+Fichier : `backend/ingest.py` (fonction `reindexer`), exposé par `backend/api.py`. Ajouté après le périmètre initial (voir la note de la section 2.2) pour éviter de repasser par une ligne de commande à chaque évolution du corpus.
+
+| Endpoint | Rôle |
+|---|---|
+| `GET /admin/documents` | Liste les PDF présents dans `data/pdf/` avec leur taille |
+| `POST /admin/documents/upload` | Dépose un nouveau PDF (multipart, 30 Mo max, extension `.pdf` imposée, nom de fichier assaini) |
+| `DELETE /admin/documents/{nom}` | Supprime le fichier PDF du disque |
+| `POST /admin/documents/reindex` | Relance l'indexation complète, exécutée dans un threadpool pour ne pas geler le serveur |
+| `GET /admin/documents/reindex/status` | Avancement de la réindexation en cours (pour la barre de progression du frontend, en interrogation périodique) |
+
+Deux points méritent d'être notés. D'abord, la suppression d'un PDF retire le fichier mais pas ses chunks de ChromaDB : ceux-ci ne disparaissent qu'à la prochaine réindexation, qui reconstruit la collection entière à partir des PDF présents à ce moment-là. C'est volontairement simple plutôt que de gérer une suppression ciblée dans la base vectorielle. Ensuite, la réindexation déclenchée à chaud réutilise le même `chromadb.PersistentClient` que celui utilisé pour répondre aux questions (`rag.get_client()`) : un incident réel a montré qu'une seconde instance de client pointée sur le même dossier peut garder une vue périmée de la collection après un `delete_collection()`/`create_collection()`, même une fois « rafraîchie » via `get_collection()` (voir section 15).
+
+### 7.6 CORS
 
 Le middleware CORS autorise toutes les origines. Cette configuration est acceptable en développement, le frontend et le backend étant servis sur des ports distincts. Elle devra être restreinte avant toute exposition publique.
 
@@ -424,6 +489,7 @@ L'interface tient dans un composant unique. Ce choix est délibéré : le périm
 
 ### 8.1 Fonctionnalités
 
+- Écran de connexion / inscription, préalable à l'accès au chatbot (voir section 9)
 - Zone de conversation avec distinction visuelle entre les messages de l'utilisateur et ceux de l'assistant
 - Trois questions d'exemple cliquables sur l'écran d'accueil, utiles pour la démonstration
 - Affichage des sources sous chaque réponse, avec le nom du document et le numéro de page
@@ -433,7 +499,15 @@ L'interface tient dans un composant unique. Ce choix est délibéré : le périm
 - Affichage du temps de réponse
 - Avertissement permanent sur les limites du système en pied de page
 
-### 8.2 Gestion des erreurs
+### 8.2 Panneau d'administration « Documents »
+
+Visible uniquement pour le rôle `admin`. Liste les PDF indexés avec leur taille, propose l'ajout d'un nouveau document (glisser-déposer ou sélection), sa suppression, et un bouton « Réindexer ».
+
+Le déclenchement d'une réindexation affiche une barre de progression alimentée par `GET /admin/documents/reindex/status`, interrogée à intervalle régulier tant que `en_cours` vaut vrai côté serveur. Sans ce retour visuel, une réindexation (plusieurs dizaines de secondes sur le corpus actuel) donnait l'impression d'une interface figée. Le composant ne bloque jamais la fin de l'appel `POST /admin/documents/reindex` : la barre disparaît dès que le statut serveur repasse à « terminé », y compris en cas d'erreur (le compteur de progression est remis à zéro dans un bloc `finally` côté serveur).
+
+Un ajout ou une suppression de document ne prend effet dans les réponses du chatbot qu'après un clic sur « Réindexer » : déposer ou retirer un fichier ne modifie que le disque, pas encore la base vectorielle interrogée par `/ask`.
+
+### 8.3 Gestion des erreurs
 
 Toute défaillance de l'API est capturée et affichée sous forme de message d'erreur dans le fil de conversation. L'interface ne se bloque jamais et ne présente jamais de page blanche, ce qui est une garantie utile en situation de démonstration.
 
@@ -441,16 +515,18 @@ Toute défaillance de l'API est capturée et affichée sous forme de message d'e
 
 ## 9. Gestion des profils utilisateurs
 
-L'objectif OF4 demande la gestion de deux profils. Le cahier des charges ne mentionne ni authentification, ni gestion de comptes, ni mots de passe. L'implémentation retenue est en conséquence volontairement minimale : un sélecteur dans l'en-tête, dont la valeur est conservée en `localStorage` et transmise à chaque appel de l'API.
+L'objectif OF4 demande la gestion de deux profils. Le cahier des charges ne détaille pas le mécanisme d'authentification ; une première version s'appuyait sur un sélecteur déclaratif côté client, explicitement documentée comme non sécurisée. Cette version a été remplacée par une authentification réelle (section 7.2) : création de compte, connexion par email et mot de passe, rôle vérifié côté serveur à chaque appel.
 
-| Profil | Accès |
+| Rôle | Accès |
 |---|---|
-| Utilisateur | Réponse, sources citées avec document et page, temps de réponse |
-| Administrateur | Idem, plus le bandeau de statistiques du corpus, les distances vectorielles associées à chaque source, et un panneau dépliable listant les huit chunks récupérés avec leur extrait, le modèle d'instrument détecté, la requête enrichie et la cause du refus le cas échéant |
+| `user` | Réponse, sources citées avec document et page, temps de réponse |
+| `admin` | Idem, plus le bandeau de statistiques du corpus, les distances vectorielles associées à chaque source, un panneau dépliable listant les chunks récupérés avec leur extrait, le modèle d'instrument détecté, la requête enrichie et la cause du refus le cas échéant, la gestion des comptes utilisateurs et le panneau de gestion des documents (section 8.2) |
 
-Le profil administrateur n'a pas qu'une fonction de démonstration. Il constitue l'outil de diagnostic principal du système : il permet de déterminer, face à une réponse insatisfaisante, si le problème vient de la récupération des chunks ou de la génération. Plusieurs incidents décrits en section 15 ont été diagnostiqués grâce à lui.
+Le rôle `admin` n'a pas qu'une fonction de démonstration. Il constitue l'outil de diagnostic principal du système : il permet de déterminer, face à une réponse insatisfaisante, si le problème vient de la récupération des chunks ou de la génération. Plusieurs incidents décrits en section 15 ont été diagnostiqués grâce à lui.
 
-**Cette implémentation ne constitue pas un mécanisme de sécurité.** Le profil est déclaratif et modifiable côté client. Toute mise en production supposerait une authentification réelle et une vérification côté serveur.
+Le premier compte administrateur ne peut pas s'auto-désigner à l'inscription (`POST /auth/register` crée toujours un compte `user`) : il se crée soit via le script `backend/make_admin.py`, soit en promouvant un compte existant depuis un compte admin déjà en place. Le dernier administrateur du système ne peut être ni rétrogradé ni supprimé, pour éviter de verrouiller l'accès au panneau d'administration.
+
+Le token JWT expire après 24 heures ; au-delà, l'utilisateur doit se reconnecter. Le mot de passe n'est jamais stocké en clair (hash bcrypt) ni renvoyé par l'API après inscription.
 
 ---
 
@@ -470,6 +546,8 @@ Chaque requête est enregistrée dans `data/logs.csv` :
 Ce fichier répond à l'output « Logs » du SIPOC et fournit la matière brute du calcul des indicateurs de suivi. Sa lecture agrégée est exposée par l'endpoint `/admin/stats`.
 
 Le format CSV a été préféré à une base de données : il est directement exploitable dans un tableur pour produire le tableau d'évaluation qualité attendu en livrable.
+
+Une base SQLite distincte, `data/users.db`, stocke les comptes (email, hash bcrypt du mot de passe, rôle, date de création). Elle ne journalise pas l'activité : c'est un annuaire de comptes, pas un journal. Les implications RGPD de ce stockage sont traitées en section 16.2.
 
 ---
 
@@ -543,7 +621,9 @@ npm run dev
 |---|---|
 | `backend/check_pdf.py` | Vérifie que les PDF comportent une couche texte exploitable et signale ceux qui nécessiteraient un OCR |
 | `backend/test_search.py` | Teste la recherche vectorielle seule, sans appel LLM, et affiche les distances |
-| `backend/test_api.py` | Teste les quatre endpoints et les deux profils |
+| `backend/test_api.py` | Teste les endpoints et les deux rôles |
+| `backend/make_admin.py` | Promeut un compte existant au rôle `admin` en ligne de commande |
+| `backend/evaluer.py` | Rejoue le jeu de tests (`eval_questions.json`) contre l'API, calcule KPI1/KPI2/KPI3, écrit `eval_results.json` et `eval_results.md` (section 14) |
 
 Le mode debug de `rag.py` affiche les chunks récupérés et la réponse brute du modèle :
 
@@ -559,19 +639,25 @@ python backend/rag.py --debug "Comment regler le tempo sur le TR-1000 ?"
 roland-chatbot/
 ├── backend/
 │   ├── ingest.py           Extraction, découpage, vectorisation, indexation
-│   ├── rag.py              Recherche, filtres, appel LLM, citation
-│   ├── api.py              API FastAPI, journalisation
+│   ├── rag.py              Recherche, reclassement, filtres, appel LLM, citation
+│   ├── api.py              API FastAPI, authentification, journalisation
+│   ├── auth.py             Hash des mots de passe, JWT, dépendances FastAPI
+│   ├── db.py                Accès à la base SQLite des comptes utilisateurs
+│   ├── make_admin.py       Promotion d'un compte au rôle admin (CLI)
 │   ├── check_pdf.py        Contrôle de la couche texte des PDF
 │   ├── test_search.py      Test de la recherche vectorielle
-│   └── test_api.py         Test des endpoints
+│   ├── test_api.py         Test des endpoints
+│   ├── evaluer.py          Jeu de tests automatisé (KPI1/KPI2/KPI3)
+│   └── eval_questions.json Questions et mots-clés attendus du jeu de tests
 ├── frontend/
 │   ├── index.html          Point d'entrée, chargement de Tailwind
 │   └── src/
 │       ├── main.jsx        Montage React
-│       └── App.jsx         Interface complète
+│       └── App.jsx         Interface complète (connexion, chat, admin)
 ├── data/
 │   ├── pdf/                Corpus source, non versionné
 │   ├── chroma/             Base vectorielle, non versionnée
+│   ├── users.db            Comptes utilisateurs (email, hash, rôle), non versionné
 │   └── logs.csv            Journal des requêtes, non versionné
 ├── .env                    Configuration locale, non versionnée
 ├── .env.example            Modèle de configuration
@@ -592,8 +678,9 @@ Le fichier `.env` et le dossier `.venv/` sont exclus du versionnement. La clé A
 
 | Variable | Valeurs | Défaut |
 |---|---|---|
-| `LLM_PROVIDER` | `mistral`, `anthropic`, `openai`, `groq` | `mistral` |
+| `LLM_PROVIDER` | `mistral`, `anthropic`, `openai`, `groq`, `grok` | `mistral` |
 | `LLM_API_KEY` | Clé du fournisseur retenu | Aucun |
+| `JWT_SECRET` | Chaîne longue et aléatoire, signature des tokens de session | Généré aléatoirement au démarrage si absent (avertissement affiché ; tous les tokens deviennent invalides au redémarrage suivant) |
 
 ### 13.2 Paramètres d'ingestion
 
@@ -611,29 +698,40 @@ Définis dans `backend/rag.py`, applicables sans réindexation.
 | Paramètre | Valeur | Effet |
 |---|---|---|
 | `SEUIL_HORS_PERIMETRE` | 0.19 | Distance au-delà de laquelle la question est refusée. Abaisser la valeur rend le système plus strict et augmente le taux de refus. |
-| `N_RESULTS` | 8 | Nombre de chunks injectés dans le prompt. Augmenter améliore le rappel mais accroît le coût par requête et le risque de dilution. |
-| `MODELES` | Liste | Instruments reconnus pour le filtrage. À maintenir en cohérence avec le corpus. |
+| `N_RESULTS` | 15 | Nombre de chunks injectés dans le prompt. Augmenter améliore le rappel mais accroît le coût par requête et le risque de dilution. Relevé depuis 8 : sur les manuels courts, les distances sont très resserrées et le bon extrait peut être devancé de peu par des paragraphes voisins. |
+| `N_ELARGI` | 50 | Taille du pool de candidats soumis au reclassement lexical (section 6.3) quand un instrument est détecté. Sans effet sur une recherche non filtrée par modèle. |
+| `BONUS_PAR_MOT_CLE` / `BONUS_MAX` | 0.03 / 0.09 | Poids du reclassement lexical par mot de la question retrouvé littéralement dans un chunk, plafonné. Un bonus trop élevé risquerait de faire remonter un chunk peu pertinent au seul motif qu'il répète les mots de la question. |
+| `MODELES` | Déduit automatiquement des noms de fichiers présents dans `data/pdf/` | Instruments reconnus pour le filtrage. Un ajout de document via le panneau admin (section 8.2) suivi d'une réindexation met cette liste à jour sans redémarrage, sans intervention manuelle sur le code. |
 
 ---
 
 ## 14. Résultats mesurés
 
-État à la date de rédaction, corpus de 4 documents et 173 chunks.
+État à la date de rédaction, corpus de 4 documents (TR-1000, TB-03, JU-06A, SH-01A ; le TR-8S, testé un temps via le panneau d'upload admin, a été retiré du corpus).
 
 | Indicateur | Cible | Mesure | Statut |
 |---|---|---|---|
 | OT1, architecture RAG avec ChromaDB | Fonctionnelle | Opérationnelle | Atteint |
-| OT2, temps de réponse | Moins de 5 s | 1.56 s | Atteint |
-| KPI3, temps moyen | Moins de 8 s | 1.01 s | Atteint |
+| OT2, temps de réponse | Moins de 5 s | 1.2 à 2.4 s selon la question | Atteint |
+| KPI3, temps moyen | Moins de 8 s | 1.24 s | Atteint |
 | OF2, citation des sources | Systématique | Document et page affichés | Atteint |
 | OF3, refus hors périmètre | Explicite | Double filtre opérationnel | Atteint |
-| OF4, deux profils | Gérés | Sélecteur et affichage différencié | Atteint |
+| OF4, deux profils | Gérés, authentification réelle | Comptes, rôles, JWT | Atteint |
+| KPI2, taux d'hallucination | Moins de 5 % | 0 % sur les 12 questions dans le périmètre | Atteint |
+| KPI1, précision | 90 % | 83 % (10/12) | Non atteint |
 | KPI4, couverture du corpus | 6 documents minimum | 4 documents | Non atteint |
-| OF1, exactitude | 90 % | Non mesuré | En cours |
-| OT3, taux d'hallucination | Moins de 5 % | Non mesuré | En cours |
 | OT4, déploiement Docker | Conteneurisé | Non réalisé | À faire |
 
-### 14.1 Distances observées
+### 14.1 Jeu de tests et tableau d'évaluation qualité
+
+Constitué dans `backend/eval_questions.json` (12 questions dans le périmètre réparties sur les 4 documents, 6 hors périmètre) et rejoué automatiquement par `backend/evaluer.py` contre l'API en conditions réelles (authentification, appel LLM effectif). Chaque question dans le périmètre porte des mots-clés attendus, extraits manuellement du texte réel des manuels ; une question est jugée correcte si la réponse n'est pas un refus et contient au moins un des mots-clés. Les résultats détaillés sont écrits à chaque exécution dans `backend/eval_results.json` et `backend/eval_results.md`.
+
+Sur la dernière campagne complète, les 6 questions hors périmètre ont toutes été correctement refusées (0 fausse réponse), et 10 des 12 questions dans le périmètre ont obtenu une réponse correcte. Deux cas ont été analysés individuellement avec le mode `--debug` de `rag.py` :
+
+- Une question sur le SH-01A (jouer en MIDI) refusée à tort pendant la campagne automatisée mais correctement répondue lors d'un test isolé immédiatement après, ce qui pointe vers un aléa ponctuel (appel LLM raté sous la charge de la campagne) plutôt qu'un défaut de récupération reproductible.
+- Une question sur le TR-1000 (sauvegarder un pattern) refusée de façon reproductible : le passage attendu (procédure `WRITE`, page 27) ne figure dans aucun des 15 chunks récupérés malgré l'enrichissement de synonymes existant (section 6.1). Conservé comme limite connue, section 15.5.
+
+### 14.2 Distances observées
 
 La calibration du seuil s'appuie sur les mesures suivantes, réalisées sur le corpus initial.
 
@@ -683,10 +781,15 @@ L'architecture reste valide, le modèle d'embeddings multilingue permettant pré
 ### 15.4 Autres limites
 
 - **Absence de contexte conversationnel.** Conforme au périmètre, mais une question de suivi n'est pas comprise comme telle.
-- **Corpus figé.** L'ajout d'un document impose une réindexation manuelle.
+- **Réindexation manuelle.** Le panneau admin (section 8.2) permet d'ajouter ou de supprimer un PDF sans ligne de commande, mais un clic sur « Réindexer » reste nécessaire pour que le changement soit pris en compte par le chatbot : aucune détection automatique de nouveau fichier.
 - **CORS permissif.** Acceptable en développement, à restreindre avant toute exposition.
-- **Profils déclaratifs.** Le profil administrateur n'est protégé par aucun mécanisme d'authentification.
 - **Dictionnaire de synonymes statique.** Il couvre les formulations les plus courantes mais reste à compléter manuellement.
+
+### 15.5 Cas résiduel de récupération non résolu (TR-1000)
+
+Documenté en détail en section 14.1 et 6.3. La question « comment sauvegarder un pattern sur le TR-1000 » reste refusée à tort malgré l'enrichissement de synonymes (section 6.1) et le reclassement lexical (section 6.3), qui ont pourtant réglé un cas comparable (le réglage du tempo, section 6.3). Le passage attendu (procédure `WRITE`) ne figure simplement pas dans les 15 chunks retournés pour cette question précise.
+
+Deux pistes de correction ont été écartées faute de temps pour les valider sans risque de régression avant la fin du projet : retoucher encore le découpage (déjà tenté sans succès sur un cas voisin, section 6.3) et élargir encore le pool de reclassement. Elles sont conservées comme axe d'amélioration (section 17).
 
 ---
 
@@ -700,9 +803,13 @@ Le projet s'inscrit dans un cadre pédagogique. Toute exploitation réelle suppo
 
 ### 16.2 Données personnelles
 
-Le système ne collecte aucune donnée personnelle. Le journal enregistre les questions posées et leurs métriques, sans identifiant utilisateur. Le profil sélectionné est stocké dans le navigateur et n'est jamais persisté côté serveur.
+L'authentification introduite après la première version du système (section 7.2, 9) modifie ce point : le système collecte désormais une adresse email et un mot de passe (jamais stocké en clair, uniquement son hash bcrypt) pour chaque compte créé, conservés dans `data/users.db`. C'est une donnée personnelle au sens du RGPD, ce que la version initiale de ce document, rédigée avant l'ajout de l'authentification, ne mentionnait pas encore.
 
-Les questions transitent en revanche par l'API du fournisseur LLM retenu, dont la politique de traitement s'applique. Cette dépendance doit être mentionnée à l'utilisateur en cas de déploiement réel.
+Le journal `logs.csv` reste non nominatif : il enregistre les questions posées et leurs métriques, sans lien vers le compte qui les a posées. Le rapprochement entre une question et un utilisateur identifié n'est donc pas possible à partir des données actuellement stockées.
+
+Dans le cadre pédagogique de ce projet, aucun compte réel d'utilisateur final n'est constitué en dehors des comptes de test des évaluateurs. Une mise en production réelle imposerait a minima une politique de confidentialité, un mécanisme de suppression de compte à la demande de l'utilisateur (actuellement possible uniquement par un administrateur via `DELETE /admin/users/{id}`, pas en autonomie par l'utilisateur lui-même), et une durée de conservation définie pour `data/users.db` et `data/logs.csv`.
+
+Les questions transitent par ailleurs par l'API du fournisseur LLM retenu, dont la politique de traitement s'applique. Cette dépendance doit être mentionnée à l'utilisateur en cas de déploiement réel.
 
 ### 16.3 Transparence et limites
 
@@ -718,15 +825,17 @@ Le profil administrateur pousse cette transparence plus loin en exposant les mé
 
 Par ordre de priorité.
 
-**1. Enrichissement du corpus.** Récupération des Reference Manuals complets et passage à 6 documents minimum. Point bloquant, conditionne tous les indicateurs de qualité.
+**1. Cas résiduel de récupération (TR-1000).** Voir section 15.5. Investiguer plus avant sans risquer de régresser les cas déjà corrects (tempo TR-1000, tous les cas TB-03/JU-06A/SH-01A), en s'appuyant sur les outils de diagnostic existants (`rag.py --debug`, `diag_chunk.py`).
 
-**2. Jeu de tests et tableau d'évaluation.** Constitution d'une trentaine de questions avec réponse attendue, exécution automatisée, notation manuelle en correct, incorrect ou halluciné. Produit les mesures de KPI1 et KPI2 et l'un des livrables attendus. L'incident décrit en section 15.2 en constitue le premier cas.
+**2. Enrichissement du corpus.** Récupération des Reference Manuals complets et passage à 6 documents minimum (KPI4). Le panneau d'administration (section 8.2) rend cet ajout possible sans ligne de commande.
 
-**3. Comparaison de modèles.** Exécution du même jeu de tests sur deux fournisseurs afin de documenter l'impact du modèle de génération sur le taux d'hallucination.
+**3. Comparaison de modèles.** Exécution du jeu de tests existant (`backend/evaluer.py`) sur plusieurs fournisseurs afin de documenter l'impact du modèle de génération sur le taux d'hallucination.
 
 **4. Conteneurisation Docker.** Objectif OT4. Un conteneur unique servant le build React en fichiers statiques depuis FastAPI est suffisant au regard du périmètre.
 
-**5. Finalisation documentaire.** Captures d'écran de l'interface et de la documentation OpenAPI, tableau d'évaluation qualité renseigné.
+**5. Autonomie des utilisateurs sur leurs données.** Actuellement, seul un administrateur peut supprimer un compte (section 16.2). Une route permettant à un utilisateur de supprimer son propre compte serait cohérente avec le point RGPD soulevé.
+
+Fait depuis la version 1.0 de ce document : authentification réelle (comptes, rôles, JWT), jeu de tests automatisé et tableau d'évaluation qualité (KPI1/KPI2/KPI3, section 14), panneau d'administration des documents avec réindexation à chaud et barre de progression (section 8.2), passage au modèle d'embeddings e5-base, reclassement lexical de la recherche (section 6.3).
 
 ---
 

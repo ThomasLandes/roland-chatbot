@@ -1,211 +1,107 @@
- a i o h a p p y e y e b a l l s = = 2 . 7 . 1 
- 
- a i o h t t p = = 3 . 1 4 . 3 
- 
- a i o s i g n a l = = 1 . 4 . 0 
- 
- a n n o t a t e d - d o c = = 0 . 0 . 5 
- 
- a n n o t a t e d - t y p e s = = 0 . 8 . 0 
- 
- a n y i o = = 4 . 1 4 . 2 
- 
- a t t r s = = 2 6 . 1 . 0 
- 
- b c r y p t = = 5 . 0 . 0 
- 
- b u i l d = = 1 . 6 . 0 
- 
- c e r t i f i = = 2 0 2 6 . 7 . 2 2 
- 
- c f f i = = 2 . 1 . 1 
- 
- c h a r s e t - n o r m a l i z e r = = 3 . 5 . 1 
- 
- c h r o m a d b = = 1 . 5 . 9 
- 
- c l i c k = = 8 . 5 . 0 
- 
- c l o u d p i c k l e = = 3 . 1 . 2 
- 
- c o l o r a m a = = 0 . 4 . 6 
- 
- c r y p t o g r a p h y = = 5 0 . 0 . 1 
- 
- d u r a t i o n p y = = 0 . 1 1 
- 
- e v a l _ t y p e _ b a c k p o r t = = 0 . 4 . 0 
- 
- f a s t a p i = = 0 . 1 4 1 . 1 
- 
- f i l e l o c k = = 3 . 3 2 . 4 
- 
- f l a t b u f f e r s = = 2 5 . 1 2 . 1 9 
- 
- f r o z e n l i s t = = 1 . 8 . 0 
- 
- f s s p e c = = 2 0 2 6 . 7 . 0 
- 
- g o o g l e a p i s - c o m m o n - p r o t o s = = 1 . 7 5 . 2 
- 
- g r p c i o = = 1 . 8 3 . 1 
- 
- h 1 1 = = 0 . 1 6 . 0 
- 
- h f - x e t = = 1 . 6 . 0 
- 
- h t t p c o r e = = 1 . 0 . 9 
- 
- h t t p t o o l s = = 0 . 8 . 0 
- 
- h t t p x = = 0 . 2 8 . 1 
- 
- h u g g i n g f a c e _ h u b = = 1 . 2 9 . 0 
- 
- i d n a = = 3 . 1 9 
- 
- i m p o r t l i b _ r e s o u r c e s = = 7 . 1 . 0 
- 
- J i n j a 2 = = 3 . 1 . 6 
- 
- j o b l i b = = 1 . 6 . 0 
- 
- j s o n p a t h - p y t h o n = = 1 . 1 . 6 
- 
- j s o n s c h e m a = = 4 . 2 6 . 0 
- 
- j s o n s c h e m a - s p e c i f i c a t i o n s = = 2 0 2 5 . 9 . 1 
- 
- k u b e r n e t e s = = 3 6 . 0 . 3 
- 
- m a r k d o w n - i t - p y = = 4 . 2 . 0 
- 
- M a r k u p S a f e = = 3 . 0 . 3 
- 
- m d u r l = = 0 . 1 . 2 
- 
- m i s t r a l a i = = 2 . 9 . 4 
- 
- m m h 3 = = 5 . 3 . 0 
- 
- m p m a t h = = 1 . 3 . 0 
- 
- m u l t i d i c t = = 6 . 7 . 1 
- 
- n a r w h a l s = = 2 . 2 5 . 0 
- 
- n e t w o r k x = = 3 . 6 . 1 
- 
- n u m p y = = 2 . 5 . 2 
- 
- o a u t h l i b = = 3 . 3 . 1 
- 
- o n n x r u n t i m e = = 1 . 2 9 . 0 
- 
- o p e n t e l e m e t r y - a p i = = 1 . 4 4 . 0 
- 
- o p e n t e l e m e t r y - e x p o r t e r - o t l p - p r o t o - c o m m o n = = 1 . 4 4 . 0 
- 
- o p e n t e l e m e t r y - e x p o r t e r - o t l p - p r o t o - g r p c = = 1 . 4 4 . 0 
- 
- o p e n t e l e m e t r y - p r o t o = = 1 . 4 4 . 0 
- 
- o p e n t e l e m e t r y - s d k = = 1 . 4 4 . 0 
- 
- o p e n t e l e m e t r y - s e m a n t i c - c o n v e n t i o n s = = 0 . 6 5 b 0 
- 
- o r j s o n = = 3 . 1 2 . 0 
- 
- o v e r r i d e s = = 7 . 7 . 0 
- 
- p a c k a g i n g = = 2 6 . 3 
- 
- p r o p c a c h e = = 0 . 5 . 2 
- 
- p r o t o b u f = = 7 . 3 6 . 0 
- 
- p y b a s e 6 4 = = 1 . 5 . 0 
- 
- p y c p a r s e r = = 3 . 0 
- 
- p y d a n t i c = = 2 . 1 3 . 5 
- 
- p y d a n t i c - s e t t i n g s = = 2 . 1 5 . 0 
- 
- p y d a n t i c _ c o r e = = 2 . 4 6 . 5 
- 
- P y g m e n t s = = 2 . 2 1 . 0 
- 
- p y p d f = = 6 . 1 6 . 2 
- 
- P y P i k a = = 0 . 5 1 . 1 
- 
- p y p r o j e c t _ h o o k s = = 1 . 2 . 0 
- 
- p y t h o n - d a t e u t i l = = 2 . 9 . 0 . p o s t 0 
- 
- p y t h o n - d o t e n v = = 1 . 2 . 3 
- 
- P y Y A M L = = 6 . 0 . 3 
- 
- r e f e r e n c i n g = = 0 . 3 7 . 0 
- 
- r e g e x = = 2 0 2 6 . 8 . 3 1 
- 
- r e q u e s t s = = 2 . 3 4 . 2 
- 
- r e q u e s t s - o a u t h l i b = = 2 . 0 . 0 
- 
- r i c h = = 1 5 . 0 . 0 
- 
- r p d s - p y = = 2 0 2 6 . 6 . 3 
- 
- s a f e t e n s o r s = = 0 . 8 . 0 
- 
- s c i k i t - l e a r n = = 1 . 9 . 0 
- 
- s c i p y = = 1 . 1 8 . 1 
- 
- s e n t e n c e - t r a n s f o r m e r s = = 6 . 0 . 1 
- 
- s e t u p t o o l s = = 8 4 . 0 . 0 
- 
- s h e l l i n g h a m = = 1 . 5 . 4 
- 
- s i x = = 1 . 1 7 . 0 
- 
- s t a r l e t t e = = 1 . 6 . 0 
- 
- s y m p y = = 1 . 1 4 . 0 
- 
- t e n a c i t y = = 9 . 1 . 4 
- 
- t h r e a d p o o l c t l = = 3 . 6 . 0 
- 
- t o k e n i z e r s = = 0 . 2 3 . 1 
- 
- t o r c h = = 2 . 1 3 . 0 
- 
- t q d m = = 4 . 7 0 . 0 
- 
- t r a n s f o r m e r s = = 5 . 1 6 . 1 
- 
- t y p e r = = 0 . 2 7 . 2 
- 
- t y p i n g - i n s p e c t i o n = = 0 . 4 . 4 
- 
- t y p i n g _ e x t e n s i o n s = = 4 . 1 6 . 0 
- 
- u r l l i b 3 = = 2 . 7 . 0 
- 
- u v i c o r n = = 0 . 5 2 . 4 
- 
- w a t c h f i l e s = = 1 . 2 . 0 
- 
- w e b s o c k e t - c l i e n t = = 1 . 9 . 1 
- 
- w e b s o c k e t s = = 1 7 . 1 
- 
- y a r l = = 1 . 2 4 . 5 
- 
- 
+aiohappyeyeballs==2.7.1
+aiohttp==3.14.3
+aiosignal==1.4.0
+annotated-doc==0.0.5
+annotated-types==0.8.0
+anyio==4.14.2
+attrs==26.1.0
+bcrypt==5.0.0
+build==1.6.0
+certifi==2026.7.22
+cffi==2.1.1
+charset-normalizer==3.5.1
+chromadb==1.5.9
+click==8.5.0
+cloudpickle==3.1.2
+colorama==0.4.6
+cryptography==50.0.1
+durationpy==0.11
+eval_type_backport==0.4.0
+fastapi==0.141.1
+filelock==3.32.4
+flatbuffers==25.12.19
+frozenlist==1.8.0
+fsspec==2026.7.0
+googleapis-common-protos==1.75.2
+grpcio==1.83.1
+h11==0.16.0
+hf-xet==1.6.0
+httpcore==1.0.9
+httptools==0.8.0
+httpx==0.28.1
+huggingface_hub==1.29.0
+idna==3.19
+importlib_resources==7.1.0
+Jinja2==3.1.6
+joblib==1.6.0
+jsonpath-python==1.1.6
+jsonschema==4.26.0
+jsonschema-specifications==2025.9.1
+kubernetes==36.0.3
+markdown-it-py==4.2.0
+MarkupSafe==3.0.3
+mdurl==0.1.2
+mistralai==2.9.4
+mmh3==5.3.0
+mpmath==1.3.0
+multidict==6.7.1
+narwhals==2.25.0
+networkx==3.6.1
+numpy==2.5.2
+oauthlib==3.3.1
+onnxruntime==1.29.0
+opentelemetry-api==1.44.0
+opentelemetry-exporter-otlp-proto-common==1.44.0
+opentelemetry-exporter-otlp-proto-grpc==1.44.0
+opentelemetry-proto==1.44.0
+opentelemetry-sdk==1.44.0
+opentelemetry-semantic-conventions==0.65b0
+orjson==3.12.0
+overrides==7.7.0
+packaging==26.3
+propcache==0.5.2
+protobuf==7.36.0
+pybase64==1.5.0
+pycparser==3.0
+pydantic==2.13.5
+pydantic-settings==2.15.0
+pydantic_core==2.46.5
+Pygments==2.21.0
+PyJWT==2.10.1
+pypdf==6.16.2
+PyPika==0.51.1
+pyproject_hooks==1.2.0
+python-dateutil==2.9.0.post0
+python-dotenv==1.2.3
+python-multipart==0.0.20
+PyYAML==6.0.3
+referencing==0.37.0
+regex==2026.8.31
+requests==2.34.2
+requests-oauthlib==2.0.0
+rich==15.0.0
+rpds-py==2026.6.3
+safetensors==0.8.0
+scikit-learn==1.9.0
+scipy==1.18.1
+sentence-transformers==6.0.1
+setuptools==84.0.0
+shellingham==1.5.4
+six==1.17.0
+starlette==1.6.0
+sympy==1.14.0
+tenacity==9.1.4
+threadpoolctl==3.6.0
+tokenizers==0.23.1
+torch==2.13.0
+tqdm==4.70.0
+transformers==5.16.1
+typer==0.27.2
+typing-inspection==0.4.4
+typing_extensions==4.16.0
+urllib3==2.7.0
+uvicorn==0.52.4
+watchfiles==1.2.0
+websocket-client==1.9.1
+websockets==17.1
+yarl==1.24.5

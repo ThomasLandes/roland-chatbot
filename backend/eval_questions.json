@@ -1,0 +1,122 @@
+[
+  {
+    "id": 1,
+    "modele": "TR-1000",
+    "question": "Comment sauvegarder un pattern sur le TR-1000 ?",
+    "type": "dans_perimetre",
+    "mots_cles": ["COPY", "SHIFT", "WRITE", "ENTER"]
+  },
+  {
+    "id": 2,
+    "modele": "TR-1000",
+    "question": "Comment regler le tempo sur le TR-1000 ?",
+    "type": "dans_perimetre",
+    "mots_cles": ["TEMPO", "C2"]
+  },
+  {
+    "id": 3,
+    "modele": "TR-1000",
+    "question": "Comment utiliser la fonction Tap Tempo sur le TR-1000 ?",
+    "type": "dans_perimetre",
+    "mots_cles": ["TEMPO", "SHIFT"]
+  },
+  {
+    "id": 4,
+    "modele": "TB-03",
+    "question": "Comment regler le tempo sur le TB-03 ?",
+    "type": "dans_perimetre",
+    "mots_cles": ["TEMPO", "VALUE"]
+  },
+  {
+    "id": 5,
+    "modele": "TB-03",
+    "question": "Comment synchroniser le TB-03 sur une horloge MIDI externe ?",
+    "type": "dans_perimetre",
+    "mots_cles": ["MIDI", "SYNC"]
+  },
+  {
+    "id": 6,
+    "modele": "TB-03",
+    "question": "Comment regler le canal MIDI du TB-03 ?",
+    "type": "dans_perimetre",
+    "mots_cles": ["MIDI", "CH"]
+  },
+  {
+    "id": 7,
+    "modele": "JU-06A",
+    "question": "Comment sauvegarder un patch sur le JU-06A ?",
+    "type": "dans_perimetre",
+    "mots_cles": ["BANK", "PATCH"]
+  },
+  {
+    "id": 8,
+    "modele": "JU-06A",
+    "question": "Comment jouer sur le JU-06A avec un clavier MIDI externe ?",
+    "type": "dans_perimetre",
+    "mots_cles": ["MIDI"]
+  },
+  {
+    "id": 9,
+    "modele": "JU-06A",
+    "question": "Comment connecter le JU-06A en USB a un ordinateur ?",
+    "type": "dans_perimetre",
+    "mots_cles": ["USB"]
+  },
+  {
+    "id": 10,
+    "modele": "SH-01A",
+    "question": "Comment sauvegarder les donnees du SH-01A sur un ordinateur ?",
+    "type": "dans_perimetre",
+    "mots_cles": ["MENU", "USB", "BACKUP"]
+  },
+  {
+    "id": 11,
+    "modele": "SH-01A",
+    "question": "Comment restaurer une sauvegarde sur le SH-01A ?",
+    "type": "dans_perimetre",
+    "mots_cles": ["RESTORE", "MENU"]
+  },
+  {
+    "id": 12,
+    "modele": "SH-01A",
+    "question": "Comment jouer sur le SH-01A en MIDI ?",
+    "type": "dans_perimetre",
+    "mots_cles": ["MIDI"]
+  },
+  {
+    "id": 16,
+    "modele": null,
+    "question": "Quelle est la recette de la tarte aux pommes ?",
+    "type": "hors_perimetre"
+  },
+  {
+    "id": 17,
+    "modele": null,
+    "question": "Quel temps fera-t-il a Paris demain ?",
+    "type": "hors_perimetre"
+  },
+  {
+    "id": 18,
+    "modele": null,
+    "question": "Peux-tu m'aider a reparer ma voiture ?",
+    "type": "hors_perimetre"
+  },
+  {
+    "id": 19,
+    "modele": null,
+    "question": "Quel est le meilleur synthetiseur Korg du marche ?",
+    "type": "hors_perimetre"
+  },
+  {
+    "id": 20,
+    "modele": null,
+    "question": "Comment configurer un serveur Minecraft ?",
+    "type": "hors_perimetre"
+  },
+  {
+    "id": 21,
+    "modele": null,
+    "question": "Combien coute le JU-06A a l'achat ?",
+    "type": "hors_perimetre"
+  }
+]

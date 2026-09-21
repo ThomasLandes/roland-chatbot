@@ -4,6 +4,7 @@ __pycache__/
 *.pyc
 data/chroma/
 data/logs.csv
+data/users.db
 node_modules/
 dist/
 .vite/
